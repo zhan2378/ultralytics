@@ -21,6 +21,7 @@ __all__ = (
     "CBAM",
     "Concat",
     "RepConv",
+    "AutoEncoder",
 )
 
 
@@ -329,3 +330,45 @@ class Concat(nn.Module):
     def forward(self, x):
         """Forward pass for the YOLOv8 mask Proto module."""
         return torch.cat(x, self.d)
+
+class AutoEncoder(nn.Module):
+    def __init__(self,c1,c2,k=3,s=1):
+        super().__init__()
+        # Encoder: compressing the input image from 640x640 down to a smaller feature map
+        self.encoder = nn.Sequential(
+            nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1),  # (3, 640, 640) -> (64, 640, 640)
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),                 # (64, 640, 640) -> (64, 320, 320)
+
+            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1), # (64, 320, 320) -> (128, 320, 320)
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),                 # (128, 320, 320) -> (128, 160, 160)
+
+            nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1), # (128, 160, 160) -> (256, 160, 160)
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),                 # (256, 160, 160) -> (256, 80, 80)
+
+            nn.Conv2d(256, 512, kernel_size=3, stride=1, padding=1), # (256, 80, 80) -> (512, 80, 80)
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),                 # (512, 80, 80) -> (512, 40, 40)
+        )
+
+        # Decoder: reconstructing back to 640x640 image
+        self.decoder = nn.Sequential(
+            nn.ConvTranspose2d(512, 256, kernel_size=2, stride=2),  # (512, 40, 40) -> (256, 80, 80)
+            nn.ReLU(),
+
+            nn.ConvTranspose2d(256, 128, kernel_size=2, stride=2),  # (256, 80, 80) -> (128, 160, 160)
+            nn.ReLU(),
+
+            nn.ConvTranspose2d(128, 64, kernel_size=2, stride=2),   # (128, 160, 160) -> (64, 320, 320)
+            nn.ReLU(),
+
+            nn.ConvTranspose2d(64, 8, kernel_size=2, stride=2),     # (64, 320, 320) -> (3, 640, 640)
+            #nn.Sigmoid()  
+        )
+
+    def forward(self, x):
+        encoded = self.encoder(x)
+        decoded = self.decoder(encoded)
+        return decoded

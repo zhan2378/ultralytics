@@ -68,6 +68,7 @@ from .conv import (
     LightConv,
     RepConv,
     SpatialAttention,
+    AutoEncoder,
 )
 from .head import OBB, Classify, Detect, Pose, RTDETRDecoder, Segment, WorldDetect, v10Detect
 from .transformer import (
@@ -150,4 +151,5 @@ __all__ = (
     "Attention",
     "PSA",
     "SCDown",
+    "AutoEncoder",
 )
