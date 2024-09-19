@@ -1,0 +1,23 @@
+train: /content/dataset/images/train  # Path to training images
+val: /content/dataset/images/val      # Path to validation images
+  #test: /path/to/your/dataset/test/images    # Path to test images (optional)
+
+nc: 4  # Number of classes in your dataset
+
+names: 
+  0: red
+  1: yellow
+  2: green
+  3: off
+
+                      # Custom anchors (optional)
+                      # anchors: 
+                      #   - [10, 13, 16, 30, 33, 23]    # Anchors for layer 1 (small objects)
+                      #     - [30, 61, 62, 45, 59, 119]   # Anchors for layer 2 (medium objects)
+                      #       - [116, 90, 156, 198, 373, 326]  # Anchors for layer 3 (large objects)
+                      #
+                      #       # Optional metadata
+                      #       metadata:
+                      #         description: "Custom dataset with small to large objects."
+                      #           resolution: "640x640"
+                      #           
