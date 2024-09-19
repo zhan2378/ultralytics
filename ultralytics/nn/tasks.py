@@ -930,6 +930,7 @@ def attempt_load_one_weight(weight, device=None, inplace=True, fuse=False):
 
 
 def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
+    #print(ch)
     """Parse a YOLO model.yaml dictionary into a PyTorch model."""
     import ast
 
@@ -952,6 +953,7 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
     if verbose:
         LOGGER.info(f"\n{'':>3}{'from':>20}{'n':>3}{'params':>10}  {'module':<45}{'arguments':<30}")
     ch = [ch]
+    #print(ch)
     layers, save, c2 = [], [], ch[-1]  # layers, savelist, ch out
     for i, (f, n, m, args) in enumerate(d["backbone"] + d["head"]):  # from, number, module, args
         print(f, n, m, args)
@@ -962,6 +964,7 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
                     args[j] = locals()[a] if a in locals() else ast.literal_eval(a)
 
         n = n_ = max(round(n * depth), 1) if n > 1 else n  # depth gain
+        #print(ch)
         if m in {
             Classify,
             Conv,
@@ -994,9 +997,10 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
             SCDown,
             C2fCIB,
             Encoder,
-            Decoder
+            #Decoder
         }:
             c1, c2 = ch[f], args[0]
+            #print(c1,c2)
             if c2 != nc:  # if c2 not equal to number of classes (i.e. for Classify() output)
                 c2 = make_divisible(min(c2, max_channels) * width, 8)
             if m is C2fAttn:
@@ -1035,9 +1039,10 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
             args = [c1, c2, *args[1:]]
         elif m is CBFuse:
             c2 = ch[f[-1]]
-        #elif m is AutoEncoder:
+        elif m is Decoder:
             #c1 = 1
             #args = [1]
+            c2 = 3
         else:
             c2 = ch[f]
 
