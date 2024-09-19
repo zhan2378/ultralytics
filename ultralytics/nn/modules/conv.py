@@ -21,7 +21,8 @@ __all__ = (
     "CBAM",
     "Concat",
     "RepConv",
-    "AutoEncoder",
+    "Encoder",
+    "Decoder",
 )
 
 
@@ -331,7 +332,7 @@ class Concat(nn.Module):
         """Forward pass for the YOLOv8 mask Proto module."""
         return torch.cat(x, self.d)
 
-class AutoEncoder(nn.Module):
+class Encoder(nn.Module):
     def __init__(self,c1,c2,k=3,s=1):
         super().__init__()
         # Encoder: compressing the input image from 640x640 down to a smaller feature map
@@ -354,6 +355,17 @@ class AutoEncoder(nn.Module):
         )
 
         # Decoder: reconstructing back to 640x640 image
+        
+
+    def forward(self, x):
+        encoded = self.encoder(x)
+        return encoded
+class Decoder(nn.Module):
+    def __init__(self,c1,c2,k=3,s=1):
+        super().__init__()
+
+
+        # Decoder: reconstructing back to 640x640 image
         self.decoder = nn.Sequential(
             nn.ConvTranspose2d(512, 256, kernel_size=2, stride=2),  # (512, 40, 40) -> (256, 80, 80)
             nn.ReLU(),
@@ -369,6 +381,5 @@ class AutoEncoder(nn.Module):
         )
 
     def forward(self, x):
-        encoded = self.encoder(x)
-        decoded = self.decoder(encoded)
+        decoded = self.decoder(x)
         return decoded

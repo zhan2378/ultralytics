@@ -68,7 +68,8 @@ from .conv import (
     LightConv,
     RepConv,
     SpatialAttention,
-    AutoEncoder,
+    Encoder,
+    Decoder,
 )
 from .head import OBB, Classify, Detect, Pose, RTDETRDecoder, Segment, WorldDetect, v10Detect
 from .transformer import (
