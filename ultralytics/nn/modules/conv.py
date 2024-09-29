@@ -23,6 +23,8 @@ __all__ = (
     "RepConv",
     "Encoder",
     "Decoder",
+    "Encoder66",
+    "Decoder66"
 )
 
 
@@ -378,6 +380,52 @@ class Decoder(nn.Module):
 
             nn.ConvTranspose2d(64, 3, kernel_size=2, stride=2),     # (64, 320, 320) -> (3, 640, 640)
             nn.Sigmoid()  
+        )
+
+    def forward(self, x):
+        decoded = self.decoder(x)
+        return decoded
+
+class Encoder66(nn.Module):
+    def __init__(self,c1,c2,k=3,s=1):
+        super().__init__()
+        # Encoder: compressing the input image from 640x640 down to a smaller feature map
+        self.encoder = nn.Sequential(
+            nn.Conv2d(3, 64, kernel_size=4, stride=2, padding=1),  # Output: 64 x 320 x 320
+            nn.ReLU(True),
+            nn.Conv2d(64, 128, kernel_size=4, stride=2, padding=1),  # Output: 128 x 160 x 160
+            nn.ReLU(True),
+            nn.Conv2d(128, 256, kernel_size=4, stride=2, padding=1),  # Output: 256 x 80 x 80
+            nn.ReLU(True),
+            nn.Conv2d(256, 512, kernel_size=4, stride=2, padding=1),  # Output: 512 x 40 x 40
+            nn.ReLU(True),
+            nn.Conv2d(512, 1024, kernel_size=4, stride=2, padding=1),  # Output: 1024 x 20 x 20
+            nn.ReLU(True)
+        )
+        # Decoder: reconstructing back to 640x640 image
+        
+
+    def forward(self, x):
+        encoded = self.encoder(x)
+        return encoded
+
+class Decoder66(nn.Module):
+    def __init__(self,c1,c2,k=3,s=1):
+        super().__init__()
+
+
+        # Decoder: reconstructing back to 640x640 image
+        self.decoder = nn.Sequential(
+            nn.ConvTranspose2d(1024, 512, kernel_size=4, stride=2, padding=1),  # Output: 512 x 40 x 40
+            nn.ReLU(True),
+            nn.ConvTranspose2d(512, 256, kernel_size=4, stride=2, padding=1),  # Output: 256 x 80 x 80
+            nn.ReLU(True),
+            nn.ConvTranspose2d(256, 128, kernel_size=4, stride=2, padding=1),  # Output: 128 x 160 x 160
+            nn.ReLU(True),
+            nn.ConvTranspose2d(128, 64, kernel_size=4, stride=2, padding=1),  # Output: 64 x 320 x 320
+            nn.ReLU(True),
+            nn.ConvTranspose2d(64, 3, kernel_size=4, stride=2, padding=1),  # Output: 3 x 640 x 640
+            nn.Sigmoid()  # To keep output pixel values between 0 and 1
         )
 
     def forward(self, x):
