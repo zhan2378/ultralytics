@@ -71,7 +71,11 @@ from .conv import (
     Encoder,
     Decoder,
     Encoder66,
-    Decoder66
+    Decoder66,
+    Dynamic_Encoder,
+    Dynamic_Decoder,
+    Dynamic_Noisy_Encoder,
+    Dynamic_Noisy_Decoder
 )
 from .head import OBB, Classify, Detect, Pose, RTDETRDecoder, Segment, WorldDetect, v10Detect
 from .transformer import (

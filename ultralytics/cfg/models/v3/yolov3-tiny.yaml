@@ -9,6 +9,8 @@ width_multiple: 1.0 # layer channel multiple
 # YOLOv3-tiny backbone
 backbone:
   # [from, number, module, args]
+  - [-1, 1, Encoder66, [3,1]] 
+  - [-1, 1, Decoder66, [3,1]]
   - [-1, 1, Conv, [16, 3, 1]] # 0
   - [-1, 1, nn.MaxPool2d, [2, 2, 0]] # 1-P1/2
   - [-1, 1, Conv, [32, 3, 1]]
@@ -31,7 +33,7 @@ head:
 
   - [-2, 1, Conv, [128, 1, 1]]
   - [-1, 1, nn.Upsample, [None, 2, "nearest"]]
-  - [[-1, 8], 1, Concat, [1]] # cat backbone P4
+  - [[-1, 10], 1, Concat, [1]] # cat backbone P4
   - [-1, 1, Conv, [256, 3, 1]] # 19 (P4/16-medium)
 
-  - [[19, 15], 1, Detect, [nc]] # Detect(P4, P5)
+  - [[21, 17], 1, Detect, [nc]] # Detect(P4, P5)

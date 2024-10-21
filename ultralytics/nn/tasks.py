@@ -59,7 +59,11 @@ from ultralytics.nn.modules import (
     Encoder,
     Decoder,
     Encoder66,
-    Decoder66
+    Decoder66,
+    Dynamic_Encoder,
+    Dynamic_Decoder,
+    Dynamic_Noisy_Encoder,
+    Dynamic_Noisy_Decoder
 )
 from ultralytics.utils import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS, LOGGER, colorstr, emojis, yaml_load
 from ultralytics.utils.checks import check_requirements, check_suffix, check_yaml
@@ -143,7 +147,9 @@ class BaseModel(nn.Module):
         """
         y, dt, embeddings = [], [], []  # outputs
         for m in self.model:
+            #print(m)
             if m.f != -1:  # if not from previous layer
+                #print(y)
                 x = y[m.f] if isinstance(m.f, int) else [x if j == -1 else y[j] for j in m.f]  # from earlier layers
             if profile:
                 self._profile_one_layer(m, x, dt)
