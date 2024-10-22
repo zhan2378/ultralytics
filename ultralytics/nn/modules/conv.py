@@ -29,6 +29,7 @@ __all__ = (
     "Dynamic_Decoder",
     "Dynamic_Noisy_Encoder",
     "Dynamic_Noisy_Decoder"
+    "GaussianNoise"
 )
 
 
@@ -570,3 +571,44 @@ class Dynamic_Noisy_Decoder(nn.Module):
     def forward(self, x):
         decoded = self.decoder(x)
         return decoded
+
+class GaussianNoise(nn.Module):
+    def __init__(self, c1,c2,k=3,s=1,snr_db=10):
+        """
+        Initialize the GaussianNoise module.
+
+        Parameters:
+        snr_db (float): Desired Signal-to-Noise Ratio in decibels (dB).
+        """
+        super(GaussianNoise, self).__init__()
+        self.snr_db = snr_db
+
+    def forward(self, signal):
+        """
+        Apply Gaussian noise to the input signal.
+
+        Parameters:
+        signal (torch.Tensor): The input tensor to which noise is added.
+
+        Returns:
+        torch.Tensor: The noisy signal.
+        """
+        # Calculate signal power (mean of the squared values)
+        P_signal = torch.mean(signal ** 2)
+
+        # Convert SNR from dB to linear scale
+        snr_linear = 10 ** (self.snr_db / 10)
+
+        # Calculate the noise power
+        P_noise = P_signal / snr_linear
+
+        # Standard deviation of the noise
+        noise_std = torch.sqrt(P_noise)
+
+        # Generate Gaussian noise
+        noise = noise_std * torch.randn_like(signal)
+
+        # Add the noise to the input signal
+        noisy_signal = signal + noise
+
+        return noisy_signal
