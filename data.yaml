@@ -1,14 +1,13 @@
-train: /mnt/home/zhan2378/dataset/images/train  # Path to training images
-val: /mnt/home/zhan2378/dataset/images/val     # Path to validation images
-test: /mnt/home/zhan2378/dataset/images/test    # Path to test images (optional)
+train: /mnt/home/zhan2378/dataset_m/images/train  # Path to training images
+val: /mnt/home/zhan2378/dataset_m/images/val     # Path to validation images
+test: /mnt/home/zhan2378/dataset_m/images/test    # Path to test images (optional)
 
-nc: 4  # Number of classes in your dataset
+nc: 2  # Number of classes in your dataset
 
 names:
   0: red
-  1: yellow
-  2: green
-  3: off
+  1: green
+
 
                       # Custom anchors (optional)
                       # anchors: 

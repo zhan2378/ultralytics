@@ -337,6 +337,7 @@ class Concat(nn.Module):
 
     def forward(self, x):
         """Forward pass for the YOLOv8 mask Proto module."""
+        #print(torch.cat(x, self.d))
         return torch.cat(x, self.d)
 
 class Encoder(nn.Module):
@@ -467,9 +468,32 @@ class Dynamic_Encoder(nn.Module):
         )
         # Decoder: reconstructing back to 640x640 image
         
+    def Gaussian_noise(self,signal,snr_db):
+        # Calculate signal power (mean of the squared values)
+        P_signal = torch.mean(signal ** 2)
+
+    # Convert SNR from dB to linear scale
+        snr_linear = 10 ** (snr_db / 10)
+
+    # Calculate the noise power
+        P_noise = P_signal / snr_linear
+
+    # Standard deviation of the noise
+        noise_std = torch.sqrt(P_noise)
+
+    # Generate Gaussian noise
+        noise = noise_std * torch.randn_like(signal)
+
+    # Add the noise to the signal
+        #noisy_signal = signal + noise
+
+        return noise
 
     def forward(self, x):
         encoded = self.encoder(x)
+        #noise = self.Gaussian_noise(encoded,10)
+        #encoded_noise = encoded + noise
+        #print(x.shape)
         return encoded
 
 class Dynamic_Decoder(nn.Module):
@@ -491,9 +515,11 @@ class Dynamic_Decoder(nn.Module):
             nn.ConvTranspose2d(dimension//8, 3, kernel_size=3, stride=2, padding=1, output_padding=1),  # Output: (3, 640, 640)
             nn.Sigmoid()  # Use sigmoid for pixel values in the range [0, 1]
         )
+    
 
     def forward(self, x):
         decoded = self.decoder(x)
+        #print(decoded.shape)
         return decoded
     
 
