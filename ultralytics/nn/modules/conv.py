@@ -646,7 +646,7 @@ class Simple_Encoder(nn.Module):
         encoded = self.encoder(x)
         #noise = self.Gaussian_noise(encoded,10)
         #encoded_noise = encoded + noise
-        #print(x.shape)
+        #print(x.shape,encoded.shape)
         return encoded
 
 class Simple_Decoder(nn.Module):
