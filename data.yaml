@@ -1,12 +1,25 @@
-train: /mnt/home/zhan2378/dataset_m/images/train  # Path to training images
-val: /mnt/home/zhan2378/dataset_m/images/val     # Path to validation images
-test: /mnt/home/zhan2378/dataset_m/images/test    # Path to test images (optional)
+train: /mnt/scratch/zhan2378/coco_traffic/images/train  # Path to training images
+val: /mnt/scratch/zhan2378/coco_traffic/images/val     # Path to validation images
+#test: /mnt/home/zhan2378/dataset_m/images/test    # Path to test images (optional)
 
-nc: 2  # Number of classes in your dataset
+nc: 14  # Number of classes in your dataset
 
 names:
-  0: red
-  1: green
+  0: person
+  1: bicycle
+  2: car
+  3: motorcycle
+  4: bus
+  5: train
+  6: truck
+  7: fire hydrant
+  8: stop sign
+  9: cat
+  10: dog
+  11: traffic_light_red
+  12: traffic_light_green
+  13: traffic_light_na
+
 
 
                       # Custom anchors (optional)

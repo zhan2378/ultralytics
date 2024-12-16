@@ -76,7 +76,9 @@ from .conv import (
     Dynamic_Decoder,
     Dynamic_Noisy_Encoder,
     Dynamic_Noisy_Decoder,
-    GaussianNoise
+    GaussianNoise,
+    Simple_Encoder,
+    Simple_Decoder
 )
 from .head import OBB, Classify, Detect, Pose, RTDETRDecoder, Segment, WorldDetect, v10Detect
 from .transformer import (

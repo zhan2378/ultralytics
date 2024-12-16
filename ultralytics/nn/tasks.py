@@ -64,7 +64,9 @@ from ultralytics.nn.modules import (
     Dynamic_Decoder,
     Dynamic_Noisy_Encoder,
     Dynamic_Noisy_Decoder,
-    GaussianNoise
+    GaussianNoise,
+    Simple_Encoder,
+    Simple_Decoder
 )
 from ultralytics.utils import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS, LOGGER, colorstr, emojis, yaml_load
 from ultralytics.utils.checks import check_requirements, check_suffix, check_yaml

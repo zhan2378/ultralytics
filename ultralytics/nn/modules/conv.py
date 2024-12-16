@@ -29,7 +29,9 @@ __all__ = (
     "Dynamic_Decoder",
     "Dynamic_Noisy_Encoder",
     "Dynamic_Noisy_Decoder"
-    "GaussianNoise"
+    "GaussianNoise",
+    "Simple_Encoder",
+    "Simple_Decoder"
 )
 
 
@@ -529,69 +531,46 @@ class Dynamic_Noisy_Encoder(nn.Module):
         self.noise_snr=noise_snr
         # Encoder: compressing the input image from 640x640 down to a smaller feature map
         self.encoder = nn.Sequential(
-            nn.Conv2d(3, dimension//8, kernel_size=3, padding=1),  # Output: (16, 640, 640)
-            nn.ReLU(True),
-            nn.MaxPool2d(2, 2),  # Output: (16, 320, 320)
-            
-            nn.Conv2d(dimension//8, dimension//4, kernel_size=3, padding=1),  # Output: (32, 320, 320)
-            nn.ReLU(True),
-            nn.MaxPool2d(2, 2),  # Output: (32, 160, 160)
-            
-            nn.Conv2d(dimension//4, dimension//2, kernel_size=3, padding=1),  # Output: (64, 160, 160)
-            nn.ReLU(True),
-            nn.MaxPool2d(2, 2),  # Output: (64, 80, 80)
-            
-            nn.Conv2d(dimension//2, dimension, kernel_size=3, padding=1),  # Output: (128, 80, 80)
-            nn.ReLU(True),
-            nn.MaxPool2d(2, 2),  # Output: (128, 40, 40)
+            nn.Conv2d(3, 32, kernel_size=3, padding=1),  # Output: 480x480x32
+            nn.ReLU(),
+            nn.MaxPool2d(2, 2),  # Output: 240x240x32
+
+            nn.Conv2d(32, 64, kernel_size=3, padding=1),  # Output: 240x240x64
+            nn.ReLU(),
+            nn.MaxPool2d(2, 2),  # Output: 120x120x64
+
+            nn.Conv2d(64, 128, kernel_size=3, padding=1),  # Output: 120x120x128
+            nn.ReLU(),
+            nn.MaxPool2d(2, 2),  # Output: 60x60x128
+
+            nn.Conv2d(128, self.latent_channels, kernel_size=3, padding=1),  # Output: 60x60xlatent_channels
+            nn.ReLU(),
+            nn.MaxPool2d(2, 2)  # Output: 30x30xlatent_channels
         )
         # Decoder: reconstructing back to 640x640 image
-    def Gaussian_noise(self,signal,snr_db):
-        # Calculate signal power (mean of the squared values)
-        P_signal = torch.mean(signal ** 2)
-
-    # Convert SNR from dB to linear scale
-        snr_linear = 10 ** (snr_db / 10)
-
-    # Calculate the noise power
-        P_noise = P_signal / snr_linear
-
-    # Standard deviation of the noise
-        noise_std = torch.sqrt(P_noise)
-
-    # Generate Gaussian noise
-        noise = noise_std * torch.randn_like(signal)
-
-    # Add the noise to the signal
-        #noisy_signal = signal + noise
-
-        return noise
-        
-
+   
     def forward(self, x):
         encoded = self.encoder(x)
-        noise = self.Gaussian_noise(encoded,self.noise_snr)
-        encoded_noise = encoded + noise
-        return encoded_noise
+        #noise = self.Gaussian_noise(encoded,self.noise_snr)
+        #encoded_noise = encoded + noise
+        return encoded
 
 class Dynamic_Noisy_Decoder(nn.Module):
     def __init__(self,c1,c2,k=3,s=1,dimension=128):
         super().__init__()
-
-
         # Decoder: reconstructing back to 640x640 image
         self.decoder = nn.Sequential(
-            nn.ConvTranspose2d(dimension, dimension//2, kernel_size=3, stride=2, padding=1, output_padding=1),  # Output: (64, 80, 80)
-            nn.ReLU(True),
-            
-            nn.ConvTranspose2d(dimension//2, dimension//4, kernel_size=3, stride=2, padding=1, output_padding=1),  # Output: (32, 160, 160)
-            nn.ReLU(True),
-            
-            nn.ConvTranspose2d(dimension//4, dimension//8, kernel_size=3, stride=2, padding=1, output_padding=1),  # Output: (16, 320, 320)
-            nn.ReLU(True),
-            
-            nn.ConvTranspose2d(dimension//8, 3, kernel_size=3, stride=2, padding=1, output_padding=1),  # Output: (3, 640, 640)
-            nn.Sigmoid()  # Use sigmoid for pixel values in the range [0, 1]
+            nn.ConvTranspose2d(256, 128, kernel_size=3, stride=2, padding=1, output_padding=1),  # Output: 60x60x128
+            nn.ReLU(),
+
+            nn.ConvTranspose2d(128, 64, kernel_size=3, stride=2, padding=1, output_padding=1),  # Output: 120x120x64
+            nn.ReLU(),
+
+            nn.ConvTranspose2d(64, 32, kernel_size=3, stride=2, padding=1, output_padding=1),  # Output: 240x240x32
+            nn.ReLU(),
+
+            nn.ConvTranspose2d(32, 3, kernel_size=3, stride=2, padding=1, output_padding=1),  # Output: 480x480x3
+            nn.Sigmoid()  # Use Sigmoid for normalized output
         )
 
     def forward(self, x):
@@ -638,3 +617,60 @@ class GaussianNoise(nn.Module):
         noisy_signal = signal + noise
 
         return noisy_signal
+
+class Simple_Encoder(nn.Module):
+    def __init__(self,c1,c2,k=3,s=1,factor=3):
+        super().__init__()
+        # Encoder: compressing the input image from 640x640 down to a smaller feature map
+        self.encoder = nn.Sequential(
+            nn.Conv2d(3, round(2*factor), kernel_size=3, padding=1),  # Output: (16, 640, 640)
+            nn.ReLU(True),
+            nn.MaxPool2d(2, 2),  # Output: (16, 320, 320)
+            
+            nn.Conv2d(round(2*factor), round(3*factor), kernel_size=3, padding=1),  # Output: (32, 320, 320)
+            nn.ReLU(True),
+            nn.MaxPool2d(2, 2),  # Output: (32, 160, 160)
+            
+            nn.Conv2d(round(3*factor), round(4*factor), kernel_size=3, padding=1),  # Output: (64, 160, 160)
+            nn.ReLU(True),
+            nn.MaxPool2d(2, 2),  # Output: (64, 80, 80)
+            
+            nn.Conv2d(round(4*factor),round( 5*factor), kernel_size=3, padding=1),  # Output: (128, 80, 80)
+            nn.ReLU(True),
+            nn.MaxPool2d(2, 2),  # Output: (128, 40, 40)
+        )
+        # Decoder: reconstructing back to 640x640 image
+        
+
+    def forward(self, x):
+        encoded = self.encoder(x)
+        #noise = self.Gaussian_noise(encoded,10)
+        #encoded_noise = encoded + noise
+        #print(x.shape)
+        return encoded
+
+class Simple_Decoder(nn.Module):
+    def __init__(self,c1,c2,k=3,s=1,factor=2):
+        super().__init__()
+
+
+        # Decoder: reconstructing back to 640x640 image
+        self.decoder = nn.Sequential(
+            nn.ConvTranspose2d(round(5*factor),round(4*factor), kernel_size=3, stride=2, padding=1, output_padding=1),  # Output: (64, 80, 80)
+            nn.ReLU(True),
+            
+            nn.ConvTranspose2d(round(4*factor), round(3*factor), kernel_size=3, stride=2, padding=1, output_padding=1),  # Output: (32, 160, 160)
+            nn.ReLU(True),
+            
+            nn.ConvTranspose2d(round(3*factor), round(2*factor), kernel_size=3, stride=2, padding=1, output_padding=1),  # Output: (16, 320, 320)
+            nn.ReLU(True),
+            
+            nn.ConvTranspose2d(round(2*factor), 3, kernel_size=3, stride=2, padding=1, output_padding=1),  # Output: (3, 640, 640)
+            nn.Sigmoid()  # Use sigmoid for pixel values in the range [0, 1]
+        )
+    
+
+    def forward(self, x):
+        decoded = self.decoder(x)
+        #print(decoded.shape)
+        return decoded
